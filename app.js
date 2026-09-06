@@ -68,14 +68,25 @@ function renderGame() {
     const isPending = state.pending?.index === index;
     const selected = state.path.includes(index);
     const classes = ['cell', letter || isPending ? '' : 'empty', !state.pending && canPlace(index) ? 'available' : '', selected ? 'selected' : '', isPending ? 'new' : ''].filter(Boolean).join(' ');
-    return `<button class="${classes}" data-index="${index}" role="gridcell" aria-label="${letter || isPending ? (isPending ? state.pending.letter : letter) : 'Пустая клетка'}">${isPending ? state.pending.letter : letter}</button>`;
+    if (isPending) {
+      return `<input class="${classes}" data-index="${index}" role="gridcell" aria-label="Новая буква" type="text" maxlength="1" inputmode="text" autocomplete="off" autocapitalize="characters" value="${state.pending.letter}" placeholder="А">`;
+    }
+    return `<button class="${classes}" data-index="${index}" role="gridcell" aria-label="${letter || 'Пустая клетка'}">${letter}</button>`;
   }).join('');
+  updateTurnSummary();
+  $('#step-copy').innerHTML = state.pending ? '<span>2</span><p>Введите букву в клетку и соберите слово</p>' : '<span>1</span><p>Выберите пустую клетку рядом с буквой</p>';
+  renderHistory();
+}
+
+function updateTurnSummary() {
   const word = state.path.map((index) => index === state.pending?.index ? state.pending.letter : state.board[index]).join('');
   $('#current-word').textContent = word || '—';
-  $('#submit-word').disabled = !state.pending || state.path.length < 2 || !state.path.includes(state.pending.index);
-  $('#new-letter-row').hidden = state.pending !== null;
-  $('#step-copy').innerHTML = state.pending ? '<span>2</span><p>Соберите слово по соседним клеткам</p>' : '<span>1</span><p>Выберите пустую клетку рядом с буквой</p>';
-  renderHistory();
+  $('#submit-word').disabled = !state.pending?.letter || state.path.length < 2 || !state.path.includes(state.pending.index);
+}
+
+function focusPendingCell() {
+  const input = $('#board input.cell');
+  if (input) input.focus();
 }
 
 $('#board').addEventListener('click', (event) => {
@@ -83,10 +94,15 @@ $('#board').addEventListener('click', (event) => {
   const index = Number(cell.dataset.index); $('#turn-error').textContent = '';
   if (!state.pending) {
     if (!canPlace(index)) { $('#turn-error').textContent = 'Выберите свободную клетку рядом с буквой'; return; }
-    state.pending = { index, letter: '' }; $('#new-letter-row').hidden = false; $('#new-letter').value = ''; $('#new-letter').focus(); renderGame(); $('#new-letter-row').hidden = false;
+    state.pending = { index, letter: '' }; state.path = []; renderGame(); focusPendingCell();
     return;
   }
-  if (index !== state.pending.index && !state.board[index]) return;
+  if (index !== state.pending.index && !state.board[index]) {
+    if (!canPlace(index)) { $('#turn-error').textContent = 'Выберите свободную клетку рядом с буквой'; return; }
+    state.pending = { index, letter: '' }; state.path = []; renderGame(); focusPendingCell();
+    return;
+  }
+  if (!state.pending.letter) { focusPendingCell(); return; }
   const position = state.path.indexOf(index);
   if (position >= 0) {
     if (position === state.path.length - 1) state.path.pop(); else $('#turn-error').textContent = 'Можно убрать только последнюю букву';
@@ -95,14 +111,14 @@ $('#board').addEventListener('click', (event) => {
   renderGame();
 });
 
-$('#new-letter').addEventListener('input', (event) => event.target.value = event.target.value.replace(/[^а-яё]/gi, '').toUpperCase().slice(0, 1));
-$('#new-letter').addEventListener('keydown', (event) => { if (event.key === 'Enter') placeLetter(); });
-$('#place-letter').addEventListener('click', placeLetter);
-function placeLetter() {
-  const letter = $('#new-letter').value.toUpperCase();
-  if (!russian.test(letter) || letter.length !== 1) { $('#turn-error').textContent = 'Введите одну русскую букву'; return; }
-  state.pending.letter = letter; state.path = []; renderGame();
-}
+$('#board').addEventListener('input', (event) => {
+  if (!event.target.matches('input.cell') || !state.pending) return;
+  const letter = event.target.value.replace(/[^а-яё]/gi, '').toUpperCase().slice(0, 1);
+  event.target.value = letter; state.pending.letter = letter; state.path = [];
+  event.target.setAttribute('aria-label', letter ? `Новая буква ${letter}` : 'Новая буква');
+  $('#turn-error').textContent = letter ? '' : 'Введите одну русскую букву';
+  updateTurnSummary();
+});
 
 $('#reset-turn').addEventListener('click', () => { state.pending = null; state.path = []; $('#turn-error').textContent = ''; renderGame(); });
 $('#submit-word').addEventListener('click', () => {
