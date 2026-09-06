@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#f5f0e8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Балда</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <header class="brand" aria-label="Балда">
+      <div class="brand-mark">Б</div>
+      <div><p>Игра в слова</p><h1>Балда</h1></div>
+    </header>
+
+    <section id="setup" class="screen active" aria-labelledby="setup-title">
+      <div class="hero">
+        <span class="eyebrow">Новая партия</span>
+        <h2 id="setup-title">Соберите компанию</h2>
+        <p>Выберите игроков и передавайте телефон по очереди.</p>
+      </div>
+      <div class="card">
+        <label class="computer-toggle" for="computer-mode">
+          <span><strong>Против компьютера</strong><small>Один игрок и компьютер</small></span>
+          <input id="computer-mode" type="checkbox" role="switch">
+          <i aria-hidden="true"></i>
+        </label>
+        <fieldset id="player-count-fieldset">
+          <legend>Количество игроков</legend>
+          <div class="segment" id="player-count">
+            <button type="button" data-count="2" class="selected">2</button>
+            <button type="button" data-count="3">3</button>
+            <button type="button" data-count="4">4</button>
+          </div>
+        </fieldset>
+        <fieldset id="difficulty-fieldset" hidden>
+          <legend>Сложность компьютера</legend>
+          <div class="segment difficulty" id="difficulty">
+            <button type="button" data-difficulty="easy">Легко</button>
+            <button type="button" data-difficulty="medium" class="selected">Средне</button>
+            <button type="button" data-difficulty="hard">Сложно</button>
+          </div>
+        </fieldset>
+        <div id="name-fields" class="name-fields"></div>
+        <button class="primary" id="to-word" type="button">Продолжить <span>→</span></button>
+      </div>
+    </section>
+
+    <section id="start-word" class="screen" aria-labelledby="word-title">
+      <button class="back" type="button" data-back="setup">← Назад</button>
+      <div class="hero compact">
+        <span class="eyebrow">Стартовое слово</span>
+        <h2 id="word-title">Задайте основу</h2>
+        <p>Введите русское слово из 5 букв. Оно займёт среднюю строку.</p>
+      </div>
+      <div class="card word-card">
+        <div class="word-label-row"><label for="initial-word">Слово из 5 букв</label><button id="suggest-word" class="text-button" type="button">Предложить другое</button></div>
+        <input id="initial-word" class="word-input" type="text" maxlength="5" inputmode="text" autocomplete="off" autocapitalize="characters" placeholder="БАЛДА">
+        <p class="input-hint">Начните с предложенного слова или введите своё.</p>
+        <div class="letter-preview" id="letter-preview" aria-hidden="true"></div>
+        <p class="error" id="word-error" role="alert"></p>
+        <button class="primary" id="start-game" type="button">Начать игру <span>→</span></button>
+      </div>
+    </section>
+
+    <section id="game" class="screen" aria-labelledby="turn-title">
+      <div class="game-top">
+        <div><span class="eyebrow">Сейчас ходит</span><h2 id="turn-title"></h2></div>
+        <div class="game-menu">
+          <button class="history-link" id="show-history" type="button" aria-haspopup="dialog">Слова <span id="history-count">0</span></button>
+          <button class="finish-link" id="finish-game" type="button">Закончить</button>
+        </div>
+      </div>
+      <div id="score-strip" class="score-strip"></div>
+      <div class="board-wrap">
+        <div id="board" class="board" role="grid" aria-label="Игровое поле 5 на 5"></div>
+      </div>
+      <div class="turn-panel" id="turn-panel">
+        <div class="step" id="step-copy"><span>1</span><p>Выберите пустую клетку рядом с буквой</p></div>
+        <div class="current-word" id="current-word" aria-live="polite">—</div>
+        <p class="error" id="turn-error" role="alert"></p>
+        <div class="turn-actions">
+          <button class="secondary" id="reset-turn" type="button">Сбросить</button>
+          <button class="primary" id="submit-word" type="button" disabled>Записать слово</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="results" class="screen" aria-labelledby="result-title">
+      <div class="result-hero"><div class="laurel">✦</div><span class="eyebrow">Партия окончена</span><h2 id="result-title">Победитель</h2><p id="winner-copy"></p></div>
+      <div id="final-score" class="final-score card"></div>
+      <button class="primary" id="restart" type="button">Начать заново</button>
+    </section>
+  </main>
+  <div id="confirm" class="modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h2 id="confirm-title">Закончить игру?</h2><p>Текущий результат будет финальным.</p>
+      <div><button class="secondary" id="cancel-finish">Продолжить</button><button class="danger" id="confirm-finish">Закончить</button></div>
+    </div>
+  </div>
+  <div id="history-modal" class="modal" hidden>
+    <div class="modal-card history" role="dialog" aria-modal="true" aria-labelledby="history-title">
+      <div class="history-header">
+        <h2 id="history-title">Слова в партии</h2>
+        <button class="close-history" id="close-history" type="button" aria-label="Закрыть список слов">×</button>
+      </div>
+      <div id="history-list"></div>
+    </div>
+  </div>
+  <div id="unknown-word-modal" class="modal" hidden>
+    <div class="modal-card" role="alertdialog" aria-modal="true" aria-labelledby="unknown-word-title" aria-describedby="unknown-word-copy">
+      <h2 id="unknown-word-title">Слова нет в словаре</h2>
+      <p id="unknown-word-copy"></p>
+      <div><button class="secondary" id="cancel-unknown-word" type="button">Отмена</button><button class="primary" id="continue-unknown-word" type="button">Продолжить</button></div>
+    </div>
+  </div>
+  <script src="dictionary.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
