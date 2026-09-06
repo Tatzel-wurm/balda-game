@@ -43,8 +43,9 @@
         <p>Введите русское слово из 5 букв. Оно займёт среднюю строку.</p>
       </div>
       <div class="card word-card">
-        <label for="initial-word">Слово из 5 букв</label>
+        <div class="word-label-row"><label for="initial-word">Слово из 5 букв</label><button id="suggest-word" class="text-button" type="button">Предложить другое</button></div>
         <input id="initial-word" class="word-input" type="text" maxlength="5" inputmode="text" autocomplete="off" autocapitalize="characters" placeholder="БАЛДА">
+        <p class="input-hint">Начните с предложенного слова или введите своё.</p>
         <div class="letter-preview" id="letter-preview" aria-hidden="true"></div>
         <p class="error" id="word-error" role="alert"></p>
         <button class="primary" id="start-game" type="button">Начать игру <span>→</span></button>
@@ -95,6 +96,14 @@
       <div id="history-list"></div>
     </div>
   </div>
+  <div id="unknown-word-modal" class="modal" hidden>
+    <div class="modal-card" role="alertdialog" aria-modal="true" aria-labelledby="unknown-word-title" aria-describedby="unknown-word-copy">
+      <h2 id="unknown-word-title">Слова нет в словаре</h2>
+      <p id="unknown-word-copy"></p>
+      <div><button class="secondary" id="cancel-unknown-word" type="button">Отмена</button><button class="primary" id="continue-unknown-word" type="button">Продолжить</button></div>
+    </div>
+  </div>
+  <script src="dictionary.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

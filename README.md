@@ -9,3 +9,7 @@ python3 -m http.server 8000
 ```
 
 Затем откройте `http://localhost:8000`.
+
+## Словарь
+
+Полный список существительных разной длины хранится локально в `dictionary.js` и основан на проекте [appomsk/russian-words](https://github.com/appomsk/russian-words/blob/main/russian-nouns). Для стартового слова из списка выбираются только пятибуквенные варианты. Для проверки слов приложению не требуется доступ к сети.

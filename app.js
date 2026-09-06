@@ -1,6 +1,8 @@
 const $ = (selector) => document.querySelector(selector);
 const screens = [...document.querySelectorAll('.screen')];
 const russian = /^[А-ЯЁ]+$/i;
+const dictionary = new Set((window.RUSSIAN_NOUNS || []).map((word) => word.toLocaleUpperCase('ru')));
+const fiveLetterWords = [...dictionary].filter((word) => word.length === 5);
 let state = { count: 2, players: [], board: Array(25).fill(''), words: new Set(), history: [], turn: 0, pending: null, path: [] };
 
 function show(id) {
@@ -31,7 +33,7 @@ $('#to-word').addEventListener('click', () => {
   const unique = new Set(names.map((name) => name.toLocaleLowerCase('ru')));
   if (unique.size !== names.length) { document.querySelector('.field input').focus(); return; }
   state.players = names.map((name) => ({ name, score: 0, words: [] }));
-  show('start-word'); setTimeout(() => $('#initial-word').focus(), 350);
+  suggestInitialWord(); show('start-word'); setTimeout(() => $('#initial-word').focus(), 350);
 });
 
 document.querySelector('[data-back]').addEventListener('click', () => show('setup'));
@@ -43,6 +45,14 @@ function renderPreview() {
   const letters = $('#initial-word').value.padEnd(5, ' ').split('');
   $('#letter-preview').innerHTML = letters.map((letter) => `<span>${letter}</span>`).join('');
 }
+
+function suggestInitialWord() {
+  const word = fiveLetterWords[Math.floor(Math.random() * fiveLetterWords.length)] || 'БАЛДА';
+  $('#initial-word').value = word;
+  $('#word-error').textContent = '';
+  renderPreview();
+}
+$('#suggest-word').addEventListener('click', suggestInitialWord);
 
 $('#start-game').addEventListener('click', () => {
   const word = $('#initial-word').value.toUpperCase();
@@ -130,16 +140,39 @@ $('#board').addEventListener('input', (event) => {
 });
 
 $('#reset-turn').addEventListener('click', () => { state.pending = null; state.path = []; $('#turn-error').textContent = ''; renderGame(); });
-$('#submit-word').addEventListener('click', () => {
-  const word = state.path.map((i) => i === state.pending.index ? state.pending.letter : state.board[i]).join('');
-  if (!state.path.includes(state.pending.index)) { $('#turn-error').textContent = 'Слово должно включать новую букву'; return; }
-  if (state.words.has(word)) { $('#turn-error').textContent = 'Это слово уже было'; return; }
+function getCurrentWord() {
+  return state.path.map((i) => i === state.pending.index ? state.pending.letter : state.board[i]).join('');
+}
+
+function recordCurrentWord(word) {
+  $('#unknown-word-modal').hidden = true;
   state.board[state.pending.index] = state.pending.letter; state.words.add(word);
   const player = state.players[state.turn]; player.words.push(word); player.score += word.length;
   state.history.push({ name: player.name, word });
   state.pending = null; state.path = [];
   if (state.board.every(Boolean)) return finishGame();
   state.turn = (state.turn + 1) % state.players.length; renderGame();
+}
+
+$('#submit-word').addEventListener('click', () => {
+  const word = getCurrentWord();
+  if (!state.path.includes(state.pending.index)) { $('#turn-error').textContent = 'Слово должно включать новую букву'; return; }
+  if (state.words.has(word)) { $('#turn-error').textContent = 'Это слово уже было'; return; }
+  if (!dictionary.has(word)) {
+    $('#unknown-word-copy').textContent = `Слово «${word}» не найдено. Всё равно записать его?`;
+    $('#unknown-word-modal').hidden = false;
+    $('#continue-unknown-word').focus();
+    return;
+  }
+  recordCurrentWord(word);
+});
+
+$('#continue-unknown-word').addEventListener('click', () => recordCurrentWord(getCurrentWord()));
+$('#cancel-unknown-word').addEventListener('click', () => {
+  $('#unknown-word-modal').hidden = true;
+  state.pending = null; state.path = [];
+  $('#turn-error').textContent = '';
+  renderGame();
 });
 
 function renderHistory() {
