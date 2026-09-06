@@ -5,14 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#f5f0e8">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Балда">
+  <meta name="description" content="Играйте в Балду вдвоём, компанией или против компьютера — даже без интернета.">
   <title>Балда</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <main class="app">
     <header class="brand" aria-label="Балда">
       <div class="brand-mark">Б</div>
-      <div><p>Игра в слова</p><h1>Балда</h1></div>
+      <div class="brand-name"><p>Игра в слова</p><h1>Балда</h1></div>
+      <button class="install-button" id="install-app" type="button" aria-haspopup="dialog">На экран «Домой»</button>
     </header>
 
     <section id="setup" class="screen active" aria-labelledby="setup-title">
@@ -114,6 +120,19 @@
       <h2 id="unknown-word-title">Слова нет в словаре</h2>
       <p id="unknown-word-copy"></p>
       <div><button class="secondary" id="cancel-unknown-word" type="button">Отмена</button><button class="primary" id="continue-unknown-word" type="button">Продолжить</button></div>
+    </div>
+  </div>
+  <div id="install-modal" class="modal" hidden>
+    <div class="modal-card install-card" role="dialog" aria-modal="true" aria-labelledby="install-title">
+      <div class="install-icon" aria-hidden="true">Б</div>
+      <h2 id="install-title">Установить «Балду»</h2>
+      <p id="install-copy">Добавьте игру на экран «Домой», чтобы запускать её как приложение и играть без интернета.</p>
+      <ol id="ios-install-steps">
+        <li>Нажмите <strong>«Поделиться»</strong> <span aria-hidden="true">□↑</span> внизу Safari.</li>
+        <li>Выберите <strong>«На экран „Домой“»</strong>.</li>
+        <li>Нажмите <strong>«Добавить»</strong>.</li>
+      </ol>
+      <div><button class="secondary" id="close-install" type="button">Не сейчас</button><button class="primary" id="confirm-install" type="button" hidden>Установить</button></div>
     </div>
   </div>
   <script src="dictionary.js"></script>
