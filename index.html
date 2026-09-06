@@ -54,7 +54,10 @@
     <section id="game" class="screen" aria-labelledby="turn-title">
       <div class="game-top">
         <div><span class="eyebrow">Сейчас ходит</span><h2 id="turn-title"></h2></div>
-        <button class="finish-link" id="finish-game" type="button">Закончить</button>
+        <div class="game-menu">
+          <button class="history-link" id="show-history" type="button" aria-haspopup="dialog">Слова <span id="history-count">0</span></button>
+          <button class="finish-link" id="finish-game" type="button">Закончить</button>
+        </div>
       </div>
       <div id="score-strip" class="score-strip"></div>
       <div class="board-wrap">
@@ -69,7 +72,6 @@
           <button class="primary" id="submit-word" type="button" disabled>Записать слово</button>
         </div>
       </div>
-      <div class="history card"><h3>Слова в партии</h3><div id="history-list"></div></div>
     </section>
 
     <section id="results" class="screen" aria-labelledby="result-title">
@@ -82,6 +84,15 @@
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
       <h2 id="confirm-title">Закончить игру?</h2><p>Текущий результат будет финальным.</p>
       <div><button class="secondary" id="cancel-finish">Продолжить</button><button class="danger" id="confirm-finish">Закончить</button></div>
+    </div>
+  </div>
+  <div id="history-modal" class="modal" hidden>
+    <div class="modal-card history" role="dialog" aria-modal="true" aria-labelledby="history-title">
+      <div class="history-header">
+        <h2 id="history-title">Слова в партии</h2>
+        <button class="close-history" id="close-history" type="button" aria-label="Закрыть список слов">×</button>
+      </div>
+      <div id="history-list"></div>
     </div>
   </div>
   <script src="app.js"></script>

@@ -1,7 +1,7 @@
 const $ = (selector) => document.querySelector(selector);
 const screens = [...document.querySelectorAll('.screen')];
 const russian = /^[А-ЯЁ]+$/i;
-let state = { count: 2, players: [], board: Array(25).fill(''), words: new Set(), turn: 0, pending: null, path: [] };
+let state = { count: 2, players: [], board: Array(25).fill(''), words: new Set(), history: [], turn: 0, pending: null, path: [] };
 
 function show(id) {
   screens.forEach((screen) => screen.classList.toggle('active', screen.id === id));
@@ -49,7 +49,7 @@ $('#start-game').addEventListener('click', () => {
   if (word.length !== 5 || !russian.test(word)) { $('#word-error').textContent = 'Нужно ровно 5 русских букв'; return; }
   state.board = Array(25).fill('');
   word.split('').forEach((letter, i) => state.board[10 + i] = letter);
-  state.words = new Set([word]); state.turn = 0; state.pending = null; state.path = [];
+  state.words = new Set([word]); state.history = []; state.turn = 0; state.pending = null; state.path = [];
   state.players.forEach((player) => { player.score = 0; player.words = []; });
   renderGame(); show('game');
 });
@@ -75,7 +75,7 @@ function renderGame() {
   }).join('');
   updateTurnSummary();
   $('#step-copy').innerHTML = state.pending ? '<span>2</span><p>Введите букву в клетку и соберите слово</p>' : '<span>1</span><p>Выберите пустую клетку рядом с буквой</p>';
-  renderHistory();
+  $('#history-count').textContent = state.history.length;
 }
 
 function updateTurnSummary() {
@@ -136,15 +136,19 @@ $('#submit-word').addEventListener('click', () => {
   if (state.words.has(word)) { $('#turn-error').textContent = 'Это слово уже было'; return; }
   state.board[state.pending.index] = state.pending.letter; state.words.add(word);
   const player = state.players[state.turn]; player.words.push(word); player.score += word.length;
+  state.history.push({ name: player.name, word });
   state.pending = null; state.path = [];
   if (state.board.every(Boolean)) return finishGame();
   state.turn = (state.turn + 1) % state.players.length; renderGame();
 });
 
 function renderHistory() {
-  const entries = state.players.flatMap((p) => p.words.map((word) => ({ name: p.name, word }))).reverse();
+  const entries = state.history;
   $('#history-list').innerHTML = entries.length ? entries.map((e) => `<div class="history-row"><strong>${e.word}</strong><span>${escapeHtml(e.name)}</span><b>+${e.word.length}</b></div>`).join('') : '<p class="empty-history">Здесь появятся составленные слова</p>';
 }
+$('#show-history').addEventListener('click', () => { renderHistory(); $('#history-modal').hidden = false; $('#close-history').focus(); });
+$('#close-history').addEventListener('click', () => { $('#history-modal').hidden = true; $('#show-history').focus(); });
+$('#history-modal').addEventListener('click', (event) => { if (event.target === $('#history-modal')) $('#close-history').click(); });
 $('#finish-game').addEventListener('click', () => $('#confirm').hidden = false);
 $('#cancel-finish').addEventListener('click', () => $('#confirm').hidden = true);
 $('#confirm-finish').addEventListener('click', () => { $('#confirm').hidden = true; finishGame(); });
@@ -156,6 +160,6 @@ function finishGame() {
   $('#final-score').innerHTML = sorted.map((p, i) => `<div class="final-row ${i === 0 ? 'winner' : ''}"><span class="rank">${i + 1}</span><strong>${escapeHtml(p.name)}</strong><span>${p.words.length} сл.</span><b>${p.score}</b></div>`).join('');
   show('results');
 }
-$('#restart').addEventListener('click', () => { state = { count: 2, players: [], board: Array(25).fill(''), words: new Set(), turn: 0, pending: null, path: [] }; $('#initial-word').value = ''; renderPreview(); renderNameFields(); show('setup'); });
+$('#restart').addEventListener('click', () => { state = { count: 2, players: [], board: Array(25).fill(''), words: new Set(), history: [], turn: 0, pending: null, path: [] }; $('#initial-word').value = ''; renderPreview(); renderNameFields(); show('setup'); });
 
 renderNameFields(); renderPreview();
