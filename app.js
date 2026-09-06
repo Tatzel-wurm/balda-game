@@ -108,6 +108,15 @@ $('#board').addEventListener('click', (event) => {
     if (position === state.path.length - 1) state.path.pop(); else $('#turn-error').textContent = 'Можно убрать только последнюю букву';
   } else if (!state.path.length || neighbors(state.path.at(-1)).includes(index)) state.path.push(index);
   else $('#turn-error').textContent = 'Буквы слова должны соприкасаться сторонами';
+
+  // Keep the live input mounted when its cell is selected. Re-rendering the
+  // board here would replace the focused input and some mobile browsers then
+  // apply the pending tap/input event to the replacement, clearing its value.
+  if (index === state.pending.index) {
+    cell.classList.toggle('selected', state.path.includes(index));
+    updateTurnSummary();
+    return;
+  }
   renderGame();
 });
 
