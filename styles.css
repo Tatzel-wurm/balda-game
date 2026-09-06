@@ -10,3 +10,4 @@
 .history-header h2{margin:0;font-size:24px}
 .close-history{width:36px;height:36px;border:0;border-radius:50%;background:#eee8de;color:var(--muted);font-size:25px;line-height:1}
 #history-modal .history-row{padding:11px 0}
+.word-label-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.word-label-row label{margin:0}.text-button{border:0;background:none;color:var(--green);padding:4px 0;font-size:13px}.input-hint{margin:8px 0 0;text-align:center;color:var(--muted);font-size:12px}
