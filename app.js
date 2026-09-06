@@ -7,7 +7,7 @@ const dictionaryByLength = [...dictionary].filter((word) => word.length > 1).red
   (groups[word.length] ||= []).push(word);
   return groups;
 }, {});
-const initialState = () => ({ count: 2, vsComputer: false, difficulty: 'medium', players: [], board: Array(25).fill(''), words: new Set(), history: [], turn: 0, pending: null, path: [], computerThinking: false });
+const initialState = () => ({ count: 2, vsComputer: false, difficulty: 'medium', players: [], board: Array(25).fill(''), words: new Set(), history: [], turn: 0, pending: null, path: [], lastMove: null, computerThinking: false });
 let state = initialState();
 
 function show(id) {
@@ -80,7 +80,7 @@ $('#start-game').addEventListener('click', () => {
   if (word.length !== 5 || !russian.test(word)) { $('#word-error').textContent = 'Нужно ровно 5 русских букв'; return; }
   state.board = Array(25).fill('');
   word.split('').forEach((letter, i) => state.board[10 + i] = letter);
-  state.words = new Set([word]); state.history = []; state.turn = 0; state.pending = null; state.path = [];
+  state.words = new Set([word]); state.history = []; state.turn = 0; state.pending = null; state.path = []; state.lastMove = null;
   state.players.forEach((player) => { player.score = 0; player.words = []; });
   renderGame(); show('game');
 });
@@ -97,8 +97,9 @@ function renderGame() {
   $('#score-strip').innerHTML = state.players.map((p, i) => `<div class="score-pill ${i === state.turn ? 'active' : ''}"><small>${escapeHtml(p.name)}</small><strong>${p.score}</strong></div>`).join('');
   $('#board').innerHTML = state.board.map((letter, index) => {
     const isPending = state.pending?.index === index;
-    const selected = state.path.includes(index);
-    const classes = ['cell', letter || isPending ? '' : 'empty', !state.pending && canPlace(index) ? 'available' : '', selected ? 'selected' : '', isPending ? 'new' : ''].filter(Boolean).join(' ');
+    const isLastNewLetter = !state.pending && state.lastMove?.index === index;
+    const selected = state.path.includes(index) || (!state.pending && state.lastMove?.path.includes(index));
+    const classes = ['cell', letter || isPending ? '' : 'empty', !state.pending && !state.lastMove && canPlace(index) ? 'available' : '', selected ? 'selected' : '', isPending || isLastNewLetter ? 'new' : ''].filter(Boolean).join(' ');
     if (isPending && !state.computerThinking) {
       return `<input class="${classes}" data-index="${index}" role="gridcell" aria-label="Новая буква" type="text" maxlength="1" inputmode="text" autocomplete="off" autocapitalize="characters" value="${state.pending.letter}" placeholder="А">`;
     }
@@ -106,13 +107,13 @@ function renderGame() {
     return `<button class="${classes}" data-index="${index}" role="gridcell" aria-label="${cellLetter || 'Пустая клетка'}" ${state.computerThinking ? 'disabled' : ''}>${cellLetter}</button>`;
   }).join('');
   updateTurnSummary();
-  $('#step-copy').innerHTML = state.computerThinking ? '<span>⌛</span><p>Компьютер подбирает слово</p>' : state.pending ? '<span>2</span><p>Введите букву в клетку и соберите слово</p>' : '<span>1</span><p>Выберите пустую клетку рядом с буквой</p>';
+  $('#step-copy').innerHTML = state.computerThinking ? '<span>⌛</span><p>Компьютер подбирает слово</p>' : state.pending || state.lastMove ? '<span>2</span><p>Введите букву в клетку и соберите слово</p>' : '<span>1</span><p>Выберите пустую клетку рядом с буквой</p>';
   $('#turn-panel').classList.toggle('computer-turn', state.computerThinking);
   $('#history-count').textContent = state.history.length;
 }
 
 function updateTurnSummary() {
-  const word = state.path.map((index) => index === state.pending?.index ? state.pending.letter : state.board[index]).join('');
+  const word = state.lastMove?.word || state.path.map((index) => index === state.pending?.index ? state.pending.letter : state.board[index]).join('');
   $('#current-word').textContent = word || '—';
   $('#submit-word').disabled = !state.pending?.letter || state.path.length < 2 || !state.path.includes(state.pending.index);
 }
@@ -126,6 +127,10 @@ $('#board').addEventListener('click', (event) => {
   if (state.computerThinking) return;
   const cell = event.target.closest('.cell'); if (!cell) return;
   const index = Number(cell.dataset.index); $('#turn-error').textContent = '';
+  if (state.lastMove) {
+    state.lastMove = null;
+    renderGame();
+  }
   if (!state.pending) {
     if (!canPlace(index)) { $('#turn-error').textContent = 'Выберите свободную клетку рядом с буквой'; return; }
     state.pending = { index, letter: '' }; state.path = []; renderGame(); focusPendingCell();
@@ -171,12 +176,17 @@ function getCurrentWord() {
 
 function recordCurrentWord(word) {
   $('#unknown-word-modal').hidden = true;
+  const completedMove = { word, path: [...state.path], index: state.pending.index };
   state.board[state.pending.index] = state.pending.letter; state.words.add(word);
   const player = state.players[state.turn]; player.words.push(word); player.score += word.length;
   state.history.push({ name: player.name, word });
   state.pending = null; state.path = [];
   if (state.board.every(Boolean)) return finishGame();
-  state.turn = (state.turn + 1) % state.players.length; renderGame();
+  state.turn = (state.turn + 1) % state.players.length;
+  // A computer turn starts immediately, so only keep a completed human move
+  // on screen when another human is waiting. Computer moves remain visible.
+  state.lastMove = state.players[state.turn].computer ? null : completedMove;
+  renderGame();
   if (state.players[state.turn].computer) scheduleComputerTurn();
 }
 
