@@ -89,6 +89,9 @@ $('#board').addEventListener('click', (event) => {
   if (index !== state.pending.index && !state.board[index]) return;
   const position = state.path.indexOf(index);
   if (position >= 0) {
+    // The newly placed letter is required for the word, so clicking it again
+    // should not accidentally remove it (and clear a one-letter selection).
+    if (index === state.pending.index) return;
     if (position === state.path.length - 1) state.path.pop(); else $('#turn-error').textContent = 'Можно убрать только последнюю букву';
   } else if (!state.path.length || neighbors(state.path.at(-1)).includes(index)) state.path.push(index);
   else $('#turn-error').textContent = 'Буквы слова должны соприкасаться сторонами';
