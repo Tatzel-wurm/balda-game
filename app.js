@@ -9,6 +9,55 @@ const dictionaryByLength = [...dictionary].filter((word) => word.length > 1).red
 }, {});
 const initialState = () => ({ count: 2, vsComputer: false, difficulty: 'medium', players: [], board: Array(25).fill(''), words: new Set(), history: [], turn: 0, pending: null, path: [], lastMove: null, computerThinking: false });
 let state = initialState();
+let installPrompt = null;
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function closeInstallModal() {
+  $('#install-modal').hidden = true;
+  $('#install-app').focus();
+}
+
+function updateInstallDialog() {
+  const canPrompt = Boolean(installPrompt);
+  $('#ios-install-steps').hidden = canPrompt;
+  $('#confirm-install').hidden = !canPrompt;
+  $('#install-copy').textContent = canPrompt
+    ? 'Установите игру, чтобы открывать её одним касанием и играть без интернета.'
+    : 'Добавьте игру на экран «Домой», чтобы запускать её как приложение и играть без интернета.';
+}
+
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  installPrompt = event;
+  updateInstallDialog();
+});
+
+window.addEventListener('appinstalled', () => {
+  installPrompt = null;
+  $('#install-modal').hidden = true;
+  $('#install-app').hidden = true;
+});
+
+$('#install-app').addEventListener('click', () => {
+  updateInstallDialog();
+  $('#install-modal').hidden = false;
+  (installPrompt ? $('#confirm-install') : $('#close-install')).focus();
+});
+$('#close-install').addEventListener('click', closeInstallModal);
+$('#install-modal').addEventListener('click', (event) => { if (event.target === $('#install-modal')) closeInstallModal(); });
+$('#confirm-install').addEventListener('click', async () => {
+  if (!installPrompt) return;
+  installPrompt.prompt();
+  await installPrompt.userChoice;
+  installPrompt = null;
+  closeInstallModal();
+});
+
+if (isStandalone()) $('#install-app').hidden = true;
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js'));
 
 function show(id) {
   screens.forEach((screen) => screen.classList.toggle('active', screen.id === id));
