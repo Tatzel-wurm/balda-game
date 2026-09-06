@@ -22,12 +22,25 @@
         <p>Выберите игроков и передавайте телефон по очереди.</p>
       </div>
       <div class="card">
-        <fieldset>
+        <label class="computer-toggle" for="computer-mode">
+          <span><strong>Против компьютера</strong><small>Один игрок и компьютер</small></span>
+          <input id="computer-mode" type="checkbox" role="switch">
+          <i aria-hidden="true"></i>
+        </label>
+        <fieldset id="player-count-fieldset">
           <legend>Количество игроков</legend>
           <div class="segment" id="player-count">
             <button type="button" data-count="2" class="selected">2</button>
             <button type="button" data-count="3">3</button>
             <button type="button" data-count="4">4</button>
+          </div>
+        </fieldset>
+        <fieldset id="difficulty-fieldset" hidden>
+          <legend>Сложность компьютера</legend>
+          <div class="segment difficulty" id="difficulty">
+            <button type="button" data-difficulty="easy">Легко</button>
+            <button type="button" data-difficulty="medium" class="selected">Средне</button>
+            <button type="button" data-difficulty="hard">Сложно</button>
           </div>
         </fieldset>
         <div id="name-fields" class="name-fields"></div>
@@ -64,7 +77,7 @@
       <div class="board-wrap">
         <div id="board" class="board" role="grid" aria-label="Игровое поле 5 на 5"></div>
       </div>
-      <div class="turn-panel">
+      <div class="turn-panel" id="turn-panel">
         <div class="step" id="step-copy"><span>1</span><p>Выберите пустую клетку рядом с буквой</p></div>
         <div class="current-word" id="current-word" aria-live="polite">—</div>
         <p class="error" id="turn-error" role="alert"></p>
