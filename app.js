@@ -197,7 +197,6 @@ $('#board').addEventListener('click', (event) => {
     openLetterPicker(index);
     return;
   }
-  if (index === state.pending.index && !state.path.length) { openLetterPicker(index); return; }
   const position = state.path.indexOf(index);
   if (position >= 0) {
     if (position === state.path.length - 1) state.path.pop(); else $('#turn-error').textContent = 'Можно убрать только последнюю букву';
