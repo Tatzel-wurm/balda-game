@@ -43,13 +43,14 @@
     </g>
     <rect x="208.8" y="4" width="196.8" height="196.8" rx="38" fill="none" stroke="#D89B32" stroke-width="12"/>
 
-    <!-- Every label uses its cell's exact centre as the text anchor. -->
-    <g font-family="DejaVu Serif, Georgia, serif" font-size="104" font-weight="700" text-anchor="middle" dominant-baseline="middle">
+    <!-- The baseline is placed 0.35 em below the geometric centre so the visible glyph,
+         rather than its lower edge, is vertically centred in every cell. -->
+    <g font-family="DejaVu Serif, Georgia, serif" font-size="104" font-weight="700" text-anchor="middle">
       <g fill="#202321">
-        <text x="102.4" y="512">Б</text><text x="512" y="512">Л</text><text x="716.8" y="512">Д</text><text x="921.6" y="512">А</text>
+        <text x="102.4" y="548.4">Б</text><text x="512" y="548.4">Л</text><text x="716.8" y="548.4">Д</text><text x="921.6" y="548.4">А</text>
       </g>
       <g fill="#FFFFFF">
-        <text x="307.2" y="102.4">Э</text><text x="307.2" y="307.2">Ф</text><text x="307.2" y="512">А</text>
+        <text x="307.2" y="138.8">Э</text><text x="307.2" y="343.6">Ф</text><text x="307.2" y="548.4">А</text>
       </g>
     </g>
   </g>
