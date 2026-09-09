@@ -1,0 +1,61 @@
+name: Generate PNG icons
+
+on:
+  push:
+    paths:
+      - "icons/icon-source.svg"
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-icons:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install SVG renderer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y librsvg2-bin
+
+      - name: Generate PNG icons
+        run: |
+          generate_icon() {
+            size="$1"
+            output="$2"
+
+            echo "Generating ${output} (${size}x${size})"
+
+            rsvg-convert \
+              --width "$size" \
+              --height "$size" \
+              icons/icon-source.svg \
+              --output "$output"
+          }
+
+          generate_icon 180 icons/apple-touch-icon.png
+          generate_icon 192 icons/icon-192.png
+          generate_icon 512 icons/icon-512.png
+
+      - name: Commit generated icons
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add \
+            icons/apple-touch-icon.png \
+            icons/icon-192.png \
+            icons/icon-512.png
+
+          if git diff --cached --quiet; then
+            echo "Generated icons are already up to date."
+            exit 0
+          fi
+
+          git commit -m "chore: regenerate PNG icons"
+          git push
