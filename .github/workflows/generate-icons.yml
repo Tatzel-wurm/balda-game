@@ -3,7 +3,7 @@ name: Generate PNG icons
 on:
   push:
     paths:
-      - "icons/icon.svg"
+      - "icons/icon-source.svg"
 
   workflow_dispatch:
 
@@ -34,7 +34,7 @@ jobs:
             rsvg-convert \
               --width "$size" \
               --height "$size" \
-              public/icon.svg \
+              public/icon-source.svg \
               --output "$output"
           }
 
