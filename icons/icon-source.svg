@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="background" x1="112" y1="80" x2="912" y2="944" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFEFB"/>
+      <stop offset="1" stop-color="#F2EEE6"/>
+    </linearGradient>
+    <linearGradient id="selected" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#47786C"/>
+      <stop offset="1" stop-color="#315E55"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F8F4EC"/>
+    </linearGradient>
+    <filter id="tileShadow" x="-15%" y="-15%" width="130%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="7" flood-color="#181A19" flood-opacity=".16"/>
+    </filter>
+    <clipPath id="iconMask">
+      <rect width="1024" height="1024" rx="224"/>
+    </clipPath>
+  </defs>
+
+  <!-- The 5 × 5 field fills the icon; the icon mask itself crops the corner cells. -->
+  <g clip-path="url(#iconMask)">
+    <rect width="1024" height="1024" fill="url(#background)"/>
+    <g stroke="#292C2A" stroke-width="10" opacity=".9">
+      <path d="M204.8 0V1024M409.6 0V1024M614.4 0V1024M819.2 0V1024"/>
+      <path d="M0 204.8H1024M0 409.6H1024M0 614.4H1024M0 819.2H1024"/>
+    </g>
+
+    <!-- Completed word and the selected vertical path. -->
+    <g filter="url(#tileShadow)" fill="url(#paper)">
+      <rect x="10" y="419.6" width="184.8" height="184.8" rx="32"/>
+      <rect x="214.8" y="419.6" width="184.8" height="184.8" rx="32"/>
+      <rect x="419.6" y="419.6" width="184.8" height="184.8" rx="32"/>
+      <rect x="624.4" y="419.6" width="184.8" height="184.8" rx="32"/>
+      <rect x="829.2" y="419.6" width="184.8" height="184.8" rx="32"/>
+    </g>
+    <g filter="url(#tileShadow)" fill="url(#selected)">
+      <rect x="214.8" y="10" width="184.8" height="184.8" rx="32"/>
+      <rect x="214.8" y="214.8" width="184.8" height="184.8" rx="32"/>
+      <rect x="214.8" y="419.6" width="184.8" height="184.8" rx="32"/>
+    </g>
+    <rect x="208.8" y="4" width="196.8" height="196.8" rx="38" fill="none" stroke="#D89B32" stroke-width="12"/>
+
+    <!-- Every label uses its cell's exact centre as the text anchor. -->
+    <g font-family="DejaVu Serif, Georgia, serif" font-size="104" font-weight="700" text-anchor="middle" dominant-baseline="middle">
+      <g fill="#202321">
+        <text x="102.4" y="512">Б</text><text x="512" y="512">Л</text><text x="716.8" y="512">Д</text><text x="921.6" y="512">А</text>
+      </g>
+      <g fill="#FFFFFF">
+        <text x="307.2" y="102.4">Э</text><text x="307.2" y="307.2">Ф</text><text x="307.2" y="512">А</text>
+      </g>
+    </g>
+  </g>
+</svg>
