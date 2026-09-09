@@ -34,7 +34,7 @@ jobs:
             rsvg-convert \
               --width "$size" \
               --height "$size" \
-              public/icon-source.svg \
+              icons/icon-source.svg \
               --output "$output"
           }
 
