@@ -5,10 +5,11 @@
 .history-link,.finish-link{font-size:13px}
 .history-link{border:0;border-radius:10px;background:#e1e9e5;color:var(--green);padding:7px 10px}
 .history-link span{display:inline-grid;place-items:center;min-width:20px;height:20px;margin-left:4px;padding:0 5px;border-radius:10px;background:var(--green);color:white;font-size:11px}
-#history-modal .history{margin:0;max-height:min(75vh,620px);overflow:auto}
+#history-modal .history{display:flex;flex-direction:column;height:min(92dvh,800px);max-height:calc(100dvh - 40px);margin:0;overflow:hidden}
 .history-header{display:flex!important;align-items:center;justify-content:space-between;margin:0 0 9px!important}
 .history-header h2{margin:0;font-size:24px}
 .close-history{width:36px;height:36px;border:0;border-radius:50%;background:#eee8de;color:var(--muted);font-size:25px;line-height:1}
+#history-list{display:block!important;min-height:0;margin-top:0!important;overflow-y:auto;overscroll-behavior:contain}
 #history-modal .history-row{padding:11px 0}
 .word-label-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.word-label-row label{margin:0}.text-button{border:0;background:none;color:var(--green);padding:4px 0;font-size:13px}.input-hint{margin:8px 0 0;text-align:center;color:var(--muted);font-size:12px}
 
