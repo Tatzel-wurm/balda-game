@@ -1,4 +1,4 @@
-const CACHE_NAME = 'balda-v4';
+const CACHE_NAME = 'balda-v5';
 const APP_SHELL = ['./', './index.html', './styles.css', './app.js', './dictionary.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', (event) => {
