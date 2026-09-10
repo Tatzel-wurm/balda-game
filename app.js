@@ -10,6 +10,8 @@ const dictionaryByLength = [...dictionary].filter((word) => word.length > 1).red
 const initialState = () => ({ count: 2, vsComputer: false, difficulty: 'medium', players: [], board: Array(25).fill(''), words: new Set(), history: [], turn: 0, pending: null, path: [], lastMove: null, computerThinking: false });
 let state = initialState();
 let installPrompt = null;
+const alphabet = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'.split('');
+let letterTarget = null;
 
 function isStandalone() {
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -149,14 +151,11 @@ function renderGame() {
     const isLastNewLetter = !state.pending && state.lastMove?.index === index;
     const selected = state.path.includes(index) || (!state.pending && state.lastMove?.path.includes(index));
     const classes = ['cell', letter || isPending ? '' : 'empty', !state.pending && !state.lastMove && canPlace(index) ? 'available' : '', selected ? 'selected' : '', isPending || isLastNewLetter ? 'new' : ''].filter(Boolean).join(' ');
-    if (isPending && !state.computerThinking) {
-      return `<input class="${classes}" data-index="${index}" role="gridcell" aria-label="Новая буква" type="text" maxlength="1" inputmode="text" autocomplete="off" autocapitalize="characters" value="${state.pending.letter}" placeholder="А">`;
-    }
     const cellLetter = isPending ? state.pending.letter : letter;
     return `<button class="${classes}" data-index="${index}" role="gridcell" aria-label="${cellLetter || 'Пустая клетка'}" ${state.computerThinking ? 'disabled' : ''}>${cellLetter}</button>`;
   }).join('');
   updateTurnSummary();
-  $('#step-copy').innerHTML = state.computerThinking ? '<span>⌛</span><p>Компьютер подбирает слово</p>' : state.pending || state.lastMove ? '<span>2</span><p>Введите букву в клетку и соберите слово</p>' : '<span>1</span><p>Выберите пустую клетку рядом с буквой</p>';
+  $('#step-copy').innerHTML = state.computerThinking ? '<span>⌛</span><p>Компьютер подбирает слово</p>' : state.pending || state.lastMove ? '<span>2</span><p>Соберите слово по соседним клеткам</p>' : '<span>1</span><p>Выберите пустую клетку рядом с буквой</p>';
   $('#turn-panel').classList.toggle('computer-turn', state.computerThinking);
   $('#history-count').textContent = state.history.length;
 }
@@ -167,9 +166,17 @@ function updateTurnSummary() {
   $('#submit-word').disabled = !state.pending?.letter || state.path.length < 2 || !state.path.includes(state.pending.index);
 }
 
-function focusPendingCell() {
-  const input = $('#board input.cell');
-  if (input) input.focus();
+function openLetterPicker(index) {
+  letterTarget = index;
+  const currentLetter = state.pending?.index === index ? state.pending.letter : '';
+  $('#letter-grid').innerHTML = alphabet.map((letter) => `<button class="letter-option${letter === currentLetter ? ' selected' : ''}" type="button" data-letter="${letter}" aria-pressed="${letter === currentLetter}">${letter}</button>`).join('');
+  $('#letter-modal').hidden = false;
+  ($('#letter-grid .selected') || $('#letter-grid .letter-option')).focus();
+}
+
+function closeLetterPicker() {
+  $('#letter-modal').hidden = true;
+  letterTarget = null;
 }
 
 $('#board').addEventListener('click', (event) => {
@@ -182,41 +189,35 @@ $('#board').addEventListener('click', (event) => {
   }
   if (!state.pending) {
     if (!canPlace(index)) { $('#turn-error').textContent = 'Выберите свободную клетку рядом с буквой'; return; }
-    state.pending = { index, letter: '' }; state.path = []; renderGame(); focusPendingCell();
+    openLetterPicker(index);
     return;
   }
   if (index !== state.pending.index && !state.board[index]) {
     if (!canPlace(index)) { $('#turn-error').textContent = 'Выберите свободную клетку рядом с буквой'; return; }
-    state.pending = { index, letter: '' }; state.path = []; renderGame(); focusPendingCell();
+    openLetterPicker(index);
     return;
   }
-  if (!state.pending.letter) { focusPendingCell(); return; }
   const position = state.path.indexOf(index);
   if (position >= 0) {
     if (position === state.path.length - 1) state.path.pop(); else $('#turn-error').textContent = 'Можно убрать только последнюю букву';
   } else if (!state.path.length || neighbors(state.path.at(-1)).includes(index)) state.path.push(index);
   else $('#turn-error').textContent = 'Буквы слова должны соприкасаться сторонами';
 
-  // Keep the live input mounted when its cell is selected. Re-rendering the
-  // board here would replace the focused input and some mobile browsers then
-  // apply the pending tap/input event to the replacement, clearing its value.
-  if (index === state.pending.index) {
-    cell.classList.toggle('selected', state.path.includes(index));
-    updateTurnSummary();
-    return;
-  }
   renderGame();
 });
 
-$('#board').addEventListener('input', (event) => {
-  if (state.computerThinking) return;
-  if (!event.target.matches('input.cell') || !state.pending) return;
-  const letter = event.target.value.replace(/[^а-яё]/gi, '').toUpperCase().slice(0, 1);
-  event.target.value = letter; state.pending.letter = letter; state.path = [];
-  event.target.setAttribute('aria-label', letter ? `Новая буква ${letter}` : 'Новая буква');
-  $('#turn-error').textContent = letter ? '' : 'Введите одну русскую букву';
-  updateTurnSummary();
+$('#letter-grid').addEventListener('click', (event) => {
+  const button = event.target.closest('[data-letter]');
+  if (!button || letterTarget === null) return;
+  state.pending = { index: letterTarget, letter: button.dataset.letter };
+  state.path = [];
+  $('#turn-error').textContent = '';
+  closeLetterPicker();
+  renderGame();
 });
+$('#close-letter').addEventListener('click', closeLetterPicker);
+$('#letter-modal').addEventListener('click', (event) => { if (event.target === $('#letter-modal')) closeLetterPicker(); });
+document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !$('#letter-modal').hidden) closeLetterPicker(); });
 
 $('#reset-turn').addEventListener('click', () => { if (state.computerThinking) return; state.pending = null; state.path = []; $('#turn-error').textContent = ''; renderGame(); });
 function getCurrentWord() {

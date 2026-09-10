@@ -122,6 +122,15 @@
       <div><button class="secondary" id="cancel-unknown-word" type="button">Отмена</button><button class="primary" id="continue-unknown-word" type="button">Продолжить</button></div>
     </div>
   </div>
+  <div id="letter-modal" class="modal letter-modal" hidden>
+    <div class="modal-card letter-card" role="dialog" aria-modal="true" aria-labelledby="letter-title">
+      <div class="letter-header">
+        <div><span class="eyebrow">Новая буква</span><h2 id="letter-title">Выберите букву</h2></div>
+        <button class="close-letter" id="close-letter" type="button" aria-label="Закрыть выбор буквы">×</button>
+      </div>
+      <div id="letter-grid" class="letter-grid" role="group" aria-label="Русский алфавит"></div>
+    </div>
+  </div>
   <div id="install-modal" class="modal" hidden>
     <div class="modal-card install-card" role="dialog" aria-modal="true" aria-labelledby="install-title">
       <div class="install-icon" aria-hidden="true">Б</div>
